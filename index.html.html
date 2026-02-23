@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAVID BROWNIZ</title>
+    <style>
+        body { 
+            background: #0a0a0a; 
+            color: #ffffff; 
+            font-family: 'Arial Black', sans-serif; 
+            padding: 40px;
+            max-width: 1300px;
+            margin: auto;
+        }
+
+        .header-main { text-align: center; margin-bottom: 50px; }
+        h1 { color: #ff6600; font-size: 3.5em; letter-spacing: 5px; margin: 0; }
+        .order-id-tag { color: #888; font-size: 14px; margin-top: 10px; }
+
+        .sensor-box {
+            background: #111;
+            padding: 15px 25px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .engine-bay { display: flex; gap: 20px; margin-bottom: 40px; }
+
+        .cylinder-card {
+            flex: 1;
+            background: #151515;
+            padding: 25px;
+            border-radius: 4px;
+            border: 1px solid #222;
+            transition: all 0.4s ease;
+        }
+
+        .cylinder-card:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.03);
+            border-color: #ff6600;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1d1d1d;
+            padding: 18px;
+            margin: 12px 0;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:active { transform: scale(0.94); }
+
+        .menu-item.selected {
+            border-color: #ff6600;
+            background: rgba(255, 102, 0, 0.15);
+        }
+
+        .price-tag { color: #ff6600; pointer-events: none; }
+
+        h3 { color: #555; font-size: 12px; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 2px; }
+
+        .footer-summary {
+            background: #111;
+            padding: 30px;
+            border-top: 4px solid #ff6600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .total-display { font-size: 38px; color: #ff6600; margin: 0; }
+        .btn-add { background: #fff; color: #000; padding: 20px 50px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-add:active { background: #ff6600; color: #fff; }
+
+        .batch-log { background: #000; padding: 30px; margin-top: 20px; border: 1px solid #111; }
+        
+        @media (max-width: 950px) { .engine-bay { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+    <div class="header-main">
+        <h1>DAVID BROWNIZ</h1>
+        <div class="order-id-tag">ORDER REFERENCE: <span id="customer-id">#...</span></div>
+    </div>
+
+    <div class="sensor-box">
+        <span id="location-status" style="color: #444;">CURRENT LOCATION: UNKNOWN</span>
+        <button onclick="getLocation()" style="background:none; border: 1px solid #444; color:#fff; padding: 10px 20px; cursor:pointer; font-size: 10px;">ADD LOCATION</button>
+        <input type="hidden" id="coords-val" value="">
+    </div>
+
+    <div class="engine-bay">
+        <div class="cylinder-card" id="base-group">
+            <h3>SELECT BASE</h3>
+            <div class="menu-item selected" onclick="selectSingle(this, 'base')" data-val="4000" data-name="Standard"><span>Standard</span> <span class="price-tag">4,000</span></div>
+            
+            <div id="rice-parent" style="background: #1d1d1d; margin: 12px 0; border: 1px solid #222;">
+                <div style="display: flex; justify-content: space-between; padding: 18px; cursor: pointer;" 
+                     onclick="let d=document.getElementById('rice-subs'); d.style.display=(d.style.display==='block'?'none':'block')">
+                    <span>Rice Only (Tap to Choose)</span>
+                    <span style="color: #ff6600;">▼</span>
+                </div>
+                <div id="rice-subs" style="display: none; background: #111;">
+                    <div class="menu-item" onclick="selectSingle(this, 'base')" data-val="5000" data-name="Steamed Rice" style="margin: 0; border-top: 1px solid #222;">
+                        <span>- Steamed</span> <span class="price-tag">5,000</span>
+                    </div>
+                    <div class="menu-item" onclick="selectSingle(this, 'base')" data-val="6000" data-name="Pilao Rice" style="margin: 0; border-top: 1px solid #222;">
+                        <span>- Pilao</span> <span class="price-tag">6,000</span>
+                    </div>
+                    <div class="menu-item" onclick="selectSingle(this, 'base')" data-val="5500" data-name="Rice Mix" style="margin: 0; border-top: 1px solid #222;">
+                        <span>- Steamed & Pilao</span> <span class="price-tag">5,500</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="selectSingle(this, 'base')" data-val="5000" data-name="Matooke"><span>Matooke Only</span> <span class="price-tag">5,000</span></div>
+            <div class="menu-item" onclick="selectSingle(this, 'base')" data-val="4000" data-name="Posho"><span>Posho Only</span> <span class="price-tag">4,000</span></div>
+        </div>
+
+        <div class="cylinder-card" id="soup-group">
+            <h3>CHOOSE SOUP</h3>
+            <div class="menu-item selected" onclick="selectSingle(this, 'soup')" data-val="0" data-name="Beans"><span>Beans</span> <span class="price-tag">FREE</span></div>
+            <div class="menu-item" onclick="selectSingle(this, 'soup')" data-val="1000" data-name="Meat"><span>Meat</span> <span class="price-tag">+1,000</span></div>
+            <div class="menu-item" onclick="selectSingle(this, 'soup')" data-val="2000" data-name="Chicken"><span>Chicken</span> <span class="price-tag">+2,000</span></div>
+            <div class="menu-item" onclick="selectSingle(this, 'soup')" data-val="2000" data-name="Fish"><span>Fish</span> <span class="price-tag">+2,000</span></div>
+        </div>
+
+        <div class="cylinder-card">
+            <h3>ADD ONS</h3>
+            <div class="menu-item extra-item" onclick="toggleExtra(this)" data-val="1000" data-name="Yams"><span>Yams</span> <span class="price-tag">+1,000</span></div>
+            <div class="menu-item extra-item" onclick="toggleExtra(this)" data-val="1000" data-name="Pumpkins"><span>Pumpkins</span> <span class="price-tag">+1,000</span></div>
+            <div class="menu-item extra-item" onclick="toggleExtra(this)" data-val="0" data-name="Salads"><span>Salads</span> <span class="price-tag">FREE</span></div>
+            <div class="menu-item extra-item" onclick="toggleExtra(this)" data-val="0" data-name="Chillies"><span>Chillies</span> <span class="price-tag">FREE</span></div>
+        </div>
+    </div>
+
+    <div class="footer-summary">
+        <div>
+            <h3 style="margin-bottom: 5px;">CURRENT SELECTIONS</h3>
+            <span id="live-desc" style="color: #666; font-size: 14px;">Standard + Beans</span>
+        </div>
+        <h2 class="total-display"><span id="live-total">4000</span> UGX</h2>
+        <button class="btn-add" onclick="addToBatch()">ADD TO ORDER</button>
+    </div>
+
+    <div class="batch-log">
+        <h3 style="color: #ff6600;">ACTIVE ORDER LIST</h3>
+        <ul id="batch-list" style="list-style: none; padding: 0;"></ul>
+        <h2 style="text-align: right; border-top: 1px solid #222; padding-top: 20px;">GRAND TOTAL: <span id="grand-total">0</span> UGX</h2>
+        <button onclick="checkout()" style="width: 100%; padding: 25px; background: #ff6600; color: #000; border: none; font-size: 20px; font-weight: bold; cursor: pointer; letter-spacing: 2px;">INITIATE PAYMENT</button>
+    </div>
+
+    <script>
+        let batch = [];
+        let grandTotal = 0;
+
+        window.onload = () => { generateNewID(); };
+
+        function generateNewID() {
+            document.getElementById('customer-id').innerText = "#DB-" + Math.floor(1000 + Math.random() * 9000);
+        }
+
+        function getLocation() {
+            const status = document.getElementById('location-status');
+            status.innerText = "LOCATION: SEARCHING...";
+            navigator.geolocation.getCurrentPosition(s => {
+                document.getElementById('coords-val').value = s.coords.latitude + "," + s.coords.longitude;
+                status.innerText = "LOCATION: ATTAINED";
+                status.style.color = "#ff6600";
+            }, () => { status.innerText = "LOCATION: FAILED"; });
+        }
+
+        function selectSingle(element, group) {
+            const groupContainer = document.getElementById(group + '-group');
+            groupContainer.querySelectorAll('.menu-item').forEach(item => item.classList.remove('selected'));
+            element.classList.add('selected');
+            calculateLive();
+        }
+
+        function toggleExtra(element) {
+            element.classList.toggle('selected');
+            calculateLive();
+        }
+
+        function calculateLive() {
+            const base = document.querySelector('#base-group .menu-item.selected');
+            const soup = document.querySelector('#soup-group .menu-item.selected');
+            const extras = document.querySelectorAll('.extra-item.selected');
+
+            if(!base || !soup) return;
+
+            let total = parseInt(base.getAttribute('data-val')) + parseInt(soup.getAttribute('data-val'));
+            let names = [base.getAttribute('data-name'), soup.getAttribute('data-name')];
+
+            extras.forEach(ex => {
+                total += parseInt(ex.getAttribute('data-val'));
+                names.push(ex.getAttribute('data-name'));
+            });
+
+            document.getElementById('live-total').innerText = total;
+            document.getElementById('live-desc').innerText = names.join(" + ");
+        }
+
+        function addToBatch() {
+            const desc = document.getElementById('live-desc').innerText;
+            const price = parseInt(document.getElementById('live-total').innerText);
+            batch.push({ desc, price });
+            renderBatch();
+        }
+
+        function renderBatch() {
+            const list = document.getElementById('batch-list');
+            list.innerHTML = "";
+            grandTotal = 0;
+
+            batch.forEach((item, index) => {
+                grandTotal += item.price;
+                const li = document.createElement('li');
+                li.style.cssText = "padding: 15px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center;";
+                li.innerHTML = "<span><small style='color:#444'>#" + (index+1) + "</small> " + item.desc + "</span>" +
+                               "<div><span style='color:#ff6600; margin-right: 20px;'>" + item.price + "</span>" +
+                               "<button onclick='removeItem(" + index + ")' style='background:none; border: 1px solid #ff0000; color: #ff0000; padding: 5px 10px; cursor: pointer; font-size: 10px;'>REMOVE</button></div>";
+                list.appendChild(li);
+            });
+            document.getElementById('grand-total').innerText = grandTotal;
+        }
+
+        function removeItem(index) {
+            batch.splice(index, 1);
+            renderBatch();
+        }
+
+        function checkout() {
+            const coords = document.getElementById('coords-val').value;
+            const orderID = document.getElementById('customer-id').innerText;
+            
+            if (grandTotal === 0) return alert("BATCH EMPTY");
+            if (!coords) return alert("GPS SIGNAL REQUIRED");
+            
+            let itemDetails = "";
+            for (let i = 0; i < batch.length; i++) {
+                itemDetails += (i + 1) + ". " + batch[i].desc + " (" + batch[i].price + " UGX)%0A";
+            }
+            
+            let message = "*NEW ORDER: " + orderID + "*%0A%0A" +
+                          "*ITEMS:*%0A" + itemDetails + "%0A" +
+                          "*TOTAL:* " + grandTotal + " UGX%0A%0A" +
+                          "*LOCATION:* https://www.google.com/maps?q=" + coords;
+
+            window.open("https://wa.me/256709153845?text=" + message, "_blank");
+
+            batch = [];
+            renderBatch();
+            generateNewID();
+            alert("ORDER SENT! YOUR CART HAS BEEN RESET.");
+        }
+    </script>
+</body>
+</html>
