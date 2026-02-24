@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>David Browniz | Best Local Food & Pilao Delivery Kampala</title>
+    <title>David Browniz | Best Local Food & Pilao and Delivery around Kampala</title>
     
     <style>
         body { background: #0a0a0a; color: #ffffff; font-family: 'Arial Black', sans-serif; padding: 40px; max-width: 1300px; margin: auto; }
@@ -158,14 +158,27 @@
             status.innerText = "SEARCHING...";
             status.className = "status-white";
             
-            navigator.geolocation.getCurrentPosition(s => {
-                document.getElementById('coords-val').value = s.coords.latitude + "," + s.coords.longitude;
-                status.innerText = "ATTAINED";
-                status.className = "status-green"; // TURNS GREEN
-            }, () => { 
-                status.innerText = "FAILED";
-                status.className = "status-red"; // TURNS RED
-            });
+            // iPhone-friendly configuration
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000, 
+                maximumAge: 0
+            };
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(s => {
+                    document.getElementById('coords-val').value = s.coords.latitude + "," + s.coords.longitude;
+                    status.innerText = "ATTAINED";
+                    status.className = "status-green"; 
+                }, (err) => { 
+                    status.innerText = "FAILED";
+                    status.className = "status-red";
+                    console.error("Location error:", err);
+                }, options);
+            } else {
+                status.innerText = "NOT SUPPORTED";
+                status.className = "status-red";
+            }
         }
 
         function selectSingle(element, group) {
