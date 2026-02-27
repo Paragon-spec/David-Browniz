@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>David Browniz | Best Local Food & Pilao and Delivery around Kampala</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff6600">
+    <link rel="apple-touch-icon" href="logo-192.png">
     
     <style>
         body { background: #0a0a0a; color: #ffffff; font-family: 'Arial Black', sans-serif; padding: 40px; max-width: 1300px; margin: auto; }
@@ -148,6 +152,17 @@
     </div>
 
     <script>
+        // OFFLINE SERVICE WORKER HANDSHAKE
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('service-worker.js').then(function(reg) {
+              console.log('App Engine Online:', reg.scope);
+            }, function(err) {
+              console.log('App Engine Failed:', err);
+            });
+          });
+        }
+
         let batch = [];
         let grandTotal = 0;
         window.onload = () => { generateNewID(); };
@@ -158,27 +173,17 @@
             status.innerText = "SEARCHING...";
             status.className = "status-white";
             
-            // iPhone-friendly configuration
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 10000, 
-                maximumAge: 0
-            };
+            // High-accuracy options for mobile GPS
+            const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(s => {
-                    document.getElementById('coords-val').value = s.coords.latitude + "," + s.coords.longitude;
-                    status.innerText = "ATTAINED";
-                    status.className = "status-green"; 
-                }, (err) => { 
-                    status.innerText = "FAILED";
-                    status.className = "status-red";
-                    console.error("Location error:", err);
-                }, options);
-            } else {
-                status.innerText = "NOT SUPPORTED";
+            navigator.geolocation.getCurrentPosition(s => {
+                document.getElementById('coords-val').value = s.coords.latitude + "," + s.coords.longitude;
+                status.innerText = "ATTAINED";
+                status.className = "status-green";
+            }, () => { 
+                status.innerText = "FAILED";
                 status.className = "status-red";
-            }
+            }, options);
         }
 
         function selectSingle(element, group) {
